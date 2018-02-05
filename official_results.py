@@ -1,5 +1,7 @@
 import os
 import utils
+import subprocess
+import sys
 
 # input arguments
 results_zip = '/Users/marten/Downloads/SemEval-2018 Task 5_ Counting Events and Participants in the Long Tail-17285-results.zip'
@@ -12,6 +14,16 @@ utils.remove_folder(results_folder)
 
 # unzip
 team2folder = utils.unzip_it(results_zip, results_folder, debug=debug_value)
+
+# move updated submission paramitamiza (with event coreference) to submissions
+command = 'cp resources/scores.txt results/submissions/paramitamirza/scores.txt'
+try:
+    output = subprocess.check_output(command, shell=True)
+except subprocess.CalledProcessError as e:
+    print(e)
+    print('exiting script because there was an error copying updated scores.txt to submissions')
+    sys.exit()
+
 
 # load data
 team2results = dict()
@@ -29,8 +41,6 @@ subtask_and_metrics = [('Subtask 1', ['s1_doc_f1']),
                        ('Subtask 3', ['s3_inc_accuracy', 's3_inc_rmse', 's3_doc_f1']),
                        ('Event Coreference', ['s1_men_coref_avg'])
                       ]
-
-
 
 caption_template = '\\caption{results for evaluation metric: \\textbf{%s}.\\hspace{\\textwidth} We mark explicitly with an asterisk the teams that had a task co-organizer as a team member}'
 
@@ -51,6 +61,7 @@ with open('latex_input.txt', 'w') as outfile:
                 outfile.write(latex_table)
 
                 metric_name = result_df.columns[1].replace('_', '\\_')
+                metric_name = metric_name.replace(' normalized', '')
                 outfile.write(caption_template % metric_name)
                 outfile.write('\\end{table}\n')
 

@@ -62,6 +62,29 @@ def unzip_it(results_zip, results_folder, debug=False):
 
     return teamname2folder
 
+def normalize(precision, perc_answered):
+    """
+    return normalized performance:
+    precision / (100 / perc_answered)
+
+    :param float precision: precision value on metric
+    :param float perc_answered: percentage of question answered
+
+    :rtype: float
+    :return: precision / (100 / perc_answered)
+    """
+    if not perc_answered:
+        return 0.0
+
+    normalized = precision / (100 / perc_answered)
+
+    return normalized
+
+
+assert normalize(50, 50) == 25
+assert normalize(0, 50) == 0
+assert normalize(50, 0) == 0
+
 
 def load_results(path_to_scores_txt):
     """
@@ -96,12 +119,17 @@ def one_results_table(target_metric, team2results, debug=0):
 
     list_of_lists = []
     header_perc_answered = f'{subtask} % answered'
-    headers = ['team', target_metric]
+    headers = ['team']
 
-    if  target_metric.endswith('coref_avg'):
-        headers[1] = 'men_coref_avg'
+    if target_metric.endswith('coref_avg'):
+        headers.append('men_coref_avg')
     else:
+        headers.append(target_metric)
         headers.append(header_perc_answered)
+
+    if any([target_metric.endswith('inc_accuracy'),
+            target_metric.endswith('doc_f1')]):
+        headers.insert(1, f'{target_metric} normalized')
 
     for team, results in team2results.items():
 
@@ -125,6 +153,11 @@ def one_results_table(target_metric, team2results, debug=0):
 
         one_row = [team, round(team_result_for_metric, 2)]
 
+        if any([target_metric.endswith('inc_accuracy'),
+                target_metric.endswith('doc_f1')]):
+            normalized_score = normalize(team_result_for_metric, perc_answered)
+            one_row.insert(1, round(normalized_score, 2))
+
         if not target_metric.endswith('coref_avg'):
             one_row.append(round(perc_answered, 2))
 
@@ -135,13 +168,12 @@ def one_results_table(target_metric, team2results, debug=0):
             print(f'no results for at all {target_metric}')
         return None
 
+
     if target_metric.endswith('rmse'):
         list_of_lists.sort(key=itemgetter(1), reverse=False)
+        list_of_lists.sort(key=itemgetter(2), reverse=True)
     else:
         list_of_lists.sort(key=itemgetter(1), reverse=True)
-
-    if not target_metric.endswith('coref_avg'):
-        list_of_lists.sort(key=itemgetter(2), reverse=True)
 
 
     metric_result_df = pandas.DataFrame(list_of_lists, columns=headers)
