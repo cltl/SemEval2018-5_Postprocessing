@@ -16,13 +16,17 @@ utils.remove_folder(results_folder)
 team2folder = utils.unzip_it(results_zip, results_folder, debug=debug_value)
 
 # move updated submission paramitamiza (with event coreference) to submissions
-command = 'cp resources/scores.txt results/submissions/paramitamirza/scores.txt'
-try:
-    output = subprocess.check_output(command, shell=True)
-except subprocess.CalledProcessError as e:
-    print(e)
-    print('exiting script because there was an error copying updated scores.txt to submissions')
-    sys.exit()
+commands = ['cp resources/paramitamirza.txt results/submissions/paramitamirza/scores.txt',
+            'cp resources/carlaabreu.txt results/submissions/CarlaAbreu/scores.txt'
+            ]
+
+for command in commands:
+    try:
+        output = subprocess.check_output(command, shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print('exiting script because there was an error copying updated scores.txt to submissions')
+        sys.exit()
 
 
 # load data
