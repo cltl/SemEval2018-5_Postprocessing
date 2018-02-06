@@ -32,11 +32,15 @@ for command in commands:
 # load data
 team2results = dict()
 for team, folder in team2folder.items():
+
+    if team == 'paramitamirza':
+        continue
+
     path_scores_txt = os.path.join(folder, 'scores.txt')
     team_results = utils.load_results(path_scores_txt)
     team2results[team] = team_results
 
-assert len(team2results) == 6
+assert len(team2results) == 5
 
 
 # to dfs
