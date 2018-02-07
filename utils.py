@@ -336,9 +336,14 @@ def create_overview_paper_results(team2results, team2official_name):
     # TODO: add coreference table + write to file
     list_of_lists = []
     headers = ['Team']
-    coref_metrics = ['bcub', 'blanc', 'ceafe', 'ceafm', 'muc']
-    headers.extend(coref_metrics)
-    headers.append('avg')
+    coref_metrics = [('bcub', 'BCUB'),
+                     ('blanc', 'BLANC'),
+                     ('ceafe', 'CEAF_E'),
+                     ('ceafm', 'CEAF_M'),
+                     ('muc', 'MUC')]
+
+    headers.extend([item[1] for item in coref_metrics])
+    headers.append('AVG')
 
 
 
@@ -352,9 +357,9 @@ def create_overview_paper_results(team2results, team2official_name):
             offical_name = team2official_name[user]
 
         one_row = [offical_name]
-        for coref_metric in coref_metrics:
+        for coref_name, coref_table_name in coref_metrics:
 
-            path = f'results/submissions/{user}/s1/{coref_metric}_all.conll'
+            path = f'results/submissions/{user}/s1/{coref_name}_all.conll'
             assert os.path.exists(path), f'{path} does not exist'
 
             p, r, f1 = p_r_f1(path, debug=False)
