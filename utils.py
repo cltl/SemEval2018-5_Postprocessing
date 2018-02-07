@@ -1,10 +1,51 @@
 import shutil
 import os
+import re
 from glob import glob
 import zipfile
 import pandas
 from operator import itemgetter
 
+
+def p_r_f1(path, debug=False):
+    """
+    given path to output coreference, extract
+    1. precision
+    2. recall
+    3. f1
+
+    :param str path: path to output file *all.conll
+
+    :rtype: tuple
+    :return: (p, ,r, f1)
+    """
+    with open(path) as infile:
+        raw = infile.read()
+        regex = '[0-9]+.[0-9]+%'
+        output = re.findall(regex, raw)
+
+        if debug:
+            print(path)
+            print(raw)
+            print(output)
+
+        assert len(output) == 3
+
+        r, p, f1 = output
+
+        if debug:
+            print(p, r, f1)
+
+    return p, r, f1
+
+assert p_r_f1('results/submissions/Piek/s1/bcub_all.conll',
+              debug=False) == ('27.11%', '59.67%', '37.28%')
+assert p_r_f1('results/submissions/IDDE/s1/ceafe_all.conll',
+       debug=False) == ('64.42%', '26.4%', '37.45%')
+
+
+assert p_r_f1('results/submissions/Piek/s1/bcub_all.conll',
+              debug=False) == ('27.11%', '59.67%', '37.28%')
 
 def remove_folder(folder):
     """
@@ -106,7 +147,10 @@ def load_results(path_to_scores_txt):
     return metric2value
 
 
-def one_results_table(target_metric, team2results, debug=0):
+def one_results_table(target_metric,
+                      team2results,
+                      team2official_name,
+                      debug=0):
     """
 
     :param team2results:
@@ -151,7 +195,7 @@ def one_results_table(target_metric, team2results, debug=0):
             team = '*Piek'
 
 
-        one_row = [team, round(team_result_for_metric, 2)]
+        one_row = [team2official_name[team], round(team_result_for_metric, 2)]
 
         if any([target_metric.endswith('inc_accuracy'),
                 target_metric.endswith('doc_f1')]):
@@ -179,3 +223,173 @@ def one_results_table(target_metric, team2results, debug=0):
     metric_result_df = pandas.DataFrame(list_of_lists, columns=headers)
     metric_result_df.index += 1
     return metric_result_df
+
+
+
+def create_official_results(team2results, team2official_name):
+    """
+    create official results and write them to latex_input.txt
+
+    :param team2results:
+    :return:
+    """
+    # to dfs
+    subtask_and_metrics = [('Subtask 1', ['s1_doc_f1']),
+                           ('Subtask 2', ['s2_inc_accuracy', 's2_inc_rmse', 's2_doc_f1']),
+                           ('Subtask 3', ['s3_inc_accuracy', 's3_inc_rmse', 's3_doc_f1']),
+                           ('Event Coreference', ['s1_men_coref_avg'])
+                           ]
+
+    caption_template = '\\caption{results for evaluation metric: \\textbf{%s}.\\hspace{\\textwidth} We mark explicitly with an asterisk the teams that had a task co-organizer as a team member}'
+
+    with open('latex_input.txt', 'w') as outfile:
+        for subtask, target_metrics in subtask_and_metrics:
+
+            outfile.write('\\section{%s}\n' % subtask)
+            for target_metric in target_metrics:
+                result_df = one_results_table(target_metric,
+                                                    team2results,
+                                                    team2official_name,
+                                                    debug=0)
+                latex_table = result_df.to_latex()
+                if latex_table:
+                    outfile.write('\\begin{table}[H]\n')
+                    outfile.write('\\centering\n')
+                    outfile.write('\\captionsetup{justification=centering}')
+                    latex_table = latex_table.replace('{}', 'Rank')
+                    outfile.write(latex_table)
+
+                    metric_name = result_df.columns[1].replace('_', '\\_')
+                    metric_name = metric_name.replace(' normalized', '')
+                    outfile.write(caption_template % metric_name)
+                    outfile.write('\\end{table}\n')
+
+def create_overview_paper_results(team2results, team2official_name):
+    """
+    create official results and write them to latex_input.txt
+
+    :param team2results:
+    :return:
+    """
+    # to dfs
+    subtask_and_metrics = [('Subtask 1', ['s1_doc_f1']),
+                           ('Subtask 2', ['s2_inc_accuracy', 's2_inc_rmse', 's2_doc_f1']),
+                           ('Subtask 3', ['s3_inc_accuracy', 's3_inc_rmse', 's3_doc_f1']),
+                           ]
+
+    caption_template = '\\caption{results for evaluation metric: \\textbf{%s}.}'
+
+    with open('overview_paper.txt', 'w') as outfile:
+        for subtask, target_metrics in subtask_and_metrics:
+
+            outfile.write('\\subsection{%s}\n' % subtask)
+            for target_metric in target_metrics:
+                result_df = one_results_table(target_metric,
+                                              team2results,
+                                              team2official_name,
+                                              debug=0)
+
+                if not target_metric.endswith('rmse'):
+                    list_of_lists = []
+
+                    short_metric_name = target_metric.replace('inc_accuracy', 'inc_acc')
+                    headers = ['Team',
+                               short_metric_name,
+                               short_metric_name]
+
+                    for index, row in result_df.iterrows():
+
+
+                        norm = row[f'{target_metric} normalized']
+                        precision = row[target_metric]
+
+                        perc_answered = row[f's{subtask[-1]} % answered']
+                        one_row = [row['team'],
+                                   norm,
+                                   f'{precision} ({perc_answered}%)']
+                        list_of_lists.append(one_row)
+
+                    result_df = pandas.DataFrame(list_of_lists, columns=headers)
+                    result_df.index += 1
+
+                latex_table = result_df.to_latex(column_format='cccc')
+
+                if latex_table:
+                    outfile.write('\\begin{table}[H]\n')
+                    outfile.write('\\centering\n')
+                    outfile.write('\\captionsetup{justification=centering}\n')
+                    outfile.write('\\setlength\\tabcolsep{2pt}\n')
+
+                    latex_table = latex_table.replace('{}', 'R')
+
+                    if not target_metric.endswith('rmse'):
+
+                        second_line = f'& & norm & (\% of Qs answered) \\\\ \n \\midrule \n'
+                        latex_table = latex_table.replace('\\midrule', second_line)
+
+
+                    outfile.write(latex_table)
+                    outfile.write(caption_template % target_metric.replace('_', '\\_'))
+                    outfile.write('\\end{table}\n')
+
+
+    # TODO: add coreference table + write to file
+    list_of_lists = []
+    headers = ['Team']
+    coref_metrics = ['bcub', 'blanc', 'ceafe', 'ceafm', 'muc']
+    headers.extend(coref_metrics)
+    headers.append('avg')
+
+
+
+    for user in ['IDDE', 'Piek', 'baseline1']:
+
+        values = []
+
+        if user == 'Piek':
+            offical_name = '*NewsReader'
+        else:
+            offical_name = team2official_name[user]
+
+        one_row = [offical_name]
+        for coref_metric in coref_metrics:
+
+            path = f'results/submissions/{user}/s1/{coref_metric}_all.conll'
+            assert os.path.exists(path), f'{path} does not exist'
+
+            p, r, f1 = p_r_f1(path, debug=False)
+
+            one_row.append(f1)
+
+            values.append(float(f1[:-1]))
+
+        # avg
+        avg = float(team2results[user]['s1_men_coref_avg'])
+        avg_string = f'{round(avg, 2)}%'
+        one_row.append(avg_string)
+
+        print()
+        print('average according to filip', avg_string)
+        print('average', avg)
+
+        list_of_lists.append(one_row)
+
+    coref_df = pandas.DataFrame(list_of_lists, columns=headers)
+    coref_df.index += 1
+
+    latex_table = coref_df.to_latex()
+    latex_table = latex_table.replace('{}', 'R')
+
+
+    with open('overview_paper.txt', 'a') as outfile:
+
+        outfile.write('\\subsection{Event Coreference}\n')
+        outfile.write('\\begin{table*}\n')
+        outfile.write('\\centering\n')
+        outfile.write('\\captionsetup{justification=centering}\n')
+
+        outfile.write(latex_table)
+        outfile.write('\\caption{Results for mention-level evaluation}.\n')
+        outfile.write('\\end{table*}\n')
+
+

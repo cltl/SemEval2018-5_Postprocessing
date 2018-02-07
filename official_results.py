@@ -42,37 +42,21 @@ for team, folder in team2folder.items():
 
 assert len(team2results) == 5
 
+team2official_name = {
+    '*Piek': '*NewsReader',
+    'CarlaAbreu': 'CarlaAbreu',
+    'superlyc': 'NAI-SEA',
+    'baseline1': 'Baseline',
+    'IDDE': 'IDDE'
+}
 
-# to dfs
-subtask_and_metrics = [('Subtask 1', ['s1_doc_f1']),
-                       ('Subtask 2', ['s2_inc_accuracy', 's2_inc_rmse', 's2_doc_f1']),
-                       ('Subtask 3', ['s3_inc_accuracy', 's3_inc_rmse', 's3_doc_f1']),
-                       ('Event Coreference', ['s1_men_coref_avg'])
-                      ]
+# create official results
+utils.create_official_results(team2results, team2official_name)
 
-caption_template = '\\caption{results for evaluation metric: \\textbf{%s}.\\hspace{\\textwidth} We mark explicitly with an asterisk the teams that had a task co-organizer as a team member}'
 
-with open('latex_input.txt', 'w') as outfile:
-    for subtask, target_metrics in subtask_and_metrics:
+# TODO: coreference table
 
-        outfile.write('\\section{%s}\n' % subtask)
-        for target_metric in target_metrics:
-            result_df = utils.one_results_table(target_metric,
-                                                team2results,
-                                                debug=0)
-            latex_table = result_df.to_latex()
-            if latex_table:
-                outfile.write('\\begin{table}[H]\n')
-                outfile.write('\\centering\n')
-                outfile.write('\\captionsetup{justification=centering}')
-                latex_table = latex_table.replace('{}', 'Rank')
-                outfile.write(latex_table)
-
-                metric_name = result_df.columns[1].replace('_', '\\_')
-                metric_name = metric_name.replace(' normalized', '')
-                outfile.write(caption_template % metric_name)
-                outfile.write('\\end{table}\n')
-
+utils.create_overview_paper_results(team2results, team2official_name)
 
 
 
