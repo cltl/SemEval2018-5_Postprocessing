@@ -50,7 +50,7 @@ team2official_name = {
     'CarlaAbreu': 'CarlaAbreu',
     'superlyc': 'NAI-SEA',
     'baseline1': 'Baseline',
-    'IDDE': 'IDDE'
+    'IDDE': 'ID-DE'
 }
 
 # create official results
@@ -66,7 +66,7 @@ teams = [
     ('CarlaAbreu', 'CarlaAbreu'),
     ('superlyc', 'NAI-SEA'),
     ('baseline1', 'Baseline'),
-    ('IDDE', 'IDDE')
+    ('IDDE', 'ID-DE')
 ]
 debug_value = 1
 output_dir = 'output'
