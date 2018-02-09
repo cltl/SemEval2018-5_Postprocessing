@@ -38,14 +38,13 @@ def p_r_f1(path, debug=False):
 
     return p, r, f1
 
-assert p_r_f1('results/submissions/Piek/s1/bcub_all.conll',
-              debug=False) == ('27.11%', '59.67%', '37.28%')
-assert p_r_f1('results/submissions/IDDE/s1/ceafe_all.conll',
-       debug=False) == ('64.42%', '26.4%', '37.45%')
-
-
-assert p_r_f1('results/submissions/Piek/s1/bcub_all.conll',
-              debug=False) == ('27.11%', '59.67%', '37.28%')
+if os.path.exists('results/submissions'):
+    assert p_r_f1('results/submissions/Piek/s1/bcub_all.conll',
+                  debug=False) == ('27.11%', '59.67%', '37.28%')
+    assert p_r_f1('results/submissions/IDDE/s1/ceafe_all.conll',
+           debug=False) == ('64.42%', '26.4%', '37.45%')
+    assert p_r_f1('results/submissions/Piek/s1/bcub_all.conll',
+                  debug=False) == ('27.11%', '59.67%', '37.28%')
 
 def remove_folder(folder):
     """
@@ -92,11 +91,19 @@ def unzip_it(results_zip, results_folder, debug=False):
             if debug:
                 print('new team name', team_name)
 
+
         teamfolder = os.path.join(submissions_dir, team_name)
         with zipfile.ZipFile(zip_folder, "r") as zip_ref:
             zip_ref.extractall(teamfolder)
 
         teamname2folder[team_name] = teamfolder
+
+        submitted_zip = zip_folder.replace('output', 'submission')
+        assert os.path.exists(submitted_zip)
+        submitted_out = os.path.join(teamfolder, 'submitted')
+
+        with zipfile.ZipFile(submitted_zip, 'r') as zip_ref:
+            zip_ref.extractall(submitted_out)
 
         if debug:
             print('unpacked to', teamfolder)
@@ -333,7 +340,6 @@ def create_overview_paper_results(team2results, team2official_name):
                     outfile.write('\\end{table}\n')
 
 
-    # TODO: add coreference table + write to file
     list_of_lists = []
     headers = ['Team']
     coref_metrics = [('bcub', 'BCUB'),
