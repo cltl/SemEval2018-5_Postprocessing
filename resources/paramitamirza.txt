@@ -1,0 +1,13 @@
+s1_doc_f1:85.67805383022773
+s1_men_coref_avg:37.632
+s1_answered:17.829457364341085
+s2_inc_accuracy:0.0
+s2_inc_rmse:0.0
+s2_doc_f1:0.0
+s2_men_coref_avg:0.0
+s2_answered:0.0
+s3_inc_accuracy:0.0
+s3_inc_rmse:0.0
+s3_doc_f1:0.0
+s3_men_coref_avg:0.0
+s3_answered:0.0
