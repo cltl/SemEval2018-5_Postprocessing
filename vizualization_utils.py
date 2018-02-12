@@ -169,7 +169,6 @@ def load_viz_input(class2system_info, target_subtask, the_range=None, debug=0):
     return viz_df, list_perc_answered
 
 
-# noinspection PyProtectedMember
 def create_barplot(viz_df, subtask, out_dir, list_percs=None):
     """
     create plot
@@ -209,3 +208,34 @@ def create_barplot(viz_df, subtask, out_dir, list_percs=None):
 
     output_path = f'{out_dir}/s{subtask}.pdf'
     plt.savefig(output_path)
+
+
+def create_barplot_v2(viz_df, subtask, out_dir, list_percs=None):
+    """
+    create plot
+
+    :param viz_df: see output load_viz_input
+    :param str subtask: 2 | 3
+    :param str out_dir: output directory for vizualizations
+    :param list list_percs: list of perc answered for all members of a
+    class for each system
+    """
+    g = sns.FacetGrid(viz_df,
+                      col="team",
+                      col_order=['CarlaAbreu', 'ID-DE', 'NAI-SEA', '*NewsReader'],
+                      margin_titles=False,
+                      size=4,
+                      aspect=.5)
+    g.map(sns.barplot, "class", "value")
+    sns.set_context(rc={"figure.figsize": (50, 25)})
+    sns.set_style("white")
+
+
+    # set xticklabels
+    #g.set_xticklabels(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10>'])
+    g.set_ylabels('Incident accuracy normalized')
+    g.set_xlabels('numerical answer class')
+
+    output_path = f'{out_dir}/s{subtask}.pdf'
+    plt.savefig(output_path)
+    plt.close()

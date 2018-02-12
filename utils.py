@@ -279,9 +279,9 @@ def create_overview_paper_results(team2results, team2official_name):
     :return:
     """
     # to dfs
-    subtask_and_metrics = [('Subtask 1', ['s1_doc_f1']),
-                           ('Subtask 2', ['s2_inc_accuracy', 's2_inc_rmse', 's2_doc_f1']),
-                           ('Subtask 3', ['s3_inc_accuracy', 's3_inc_rmse', 's3_doc_f1']),
+    subtask_and_metrics = [('Incident-level evaluation', ['s2_inc_accuracy', 's2_inc_rmse',
+                                                          's3_inc_accuracy', 's3_inc_rmse']),
+                           ('Document-level evaluation', ['s2_doc_f1', 's3_doc_f1']),
                            ]
 
     caption_template = '\\caption{results for evaluation metric: \\textbf{%s}.}'
@@ -290,7 +290,10 @@ def create_overview_paper_results(team2results, team2official_name):
         for subtask, target_metrics in subtask_and_metrics:
 
             outfile.write('\\subsection{%s}\n' % subtask)
+
             for target_metric in target_metrics:
+
+                print(target_metric)
                 result_df = one_results_table(target_metric,
                                               team2results,
                                               team2official_name,
@@ -306,11 +309,12 @@ def create_overview_paper_results(team2results, team2official_name):
 
                     for index, row in result_df.iterrows():
 
-
                         norm = row[f'{target_metric} normalized']
                         precision = row[target_metric]
 
-                        perc_answered = row[f's{subtask[-1]} % answered']
+                        print(row)
+                        print(subtask[1])
+                        perc_answered = row[f's{target_metric[1]} % answered']
                         one_row = [row['team'],
                                    norm,
                                    f'{precision} ({perc_answered}%)']

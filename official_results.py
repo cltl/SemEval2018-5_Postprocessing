@@ -62,7 +62,7 @@ utils.create_overview_paper_results(team2results, team2official_name)
 # vizualization
 answers = viz_utils.load_gold('resources/test_data_gold/')
 teams = [
-    ('Piek', 'NewsReader'),
+    ('Piek', '*NewsReader'),
     ('CarlaAbreu', 'CarlaAbreu'),
     ('superlyc', 'NAI-SEA'),
     ('baseline1', 'Baseline'),
@@ -71,7 +71,9 @@ teams = [
 debug_value = 1
 output_dir = 'output'
 
-for subtask in ['2', '3']:
+for subtask in ['2',
+                '3'
+                ]:
     class2subtask_system2answers = viz_utils.load_systems('results/submissions/',
                                                           answers,
                                                           teams,
@@ -83,5 +85,6 @@ for subtask in ['2', '3']:
                                                   the_range=range(0, 1000),
                                                   debug=debug_value)
 
-    output = viz_utils.create_barplot(viz_df, subtask, output_dir)
+    #output = viz_utils.create_barplot(viz_df, subtask, output_dir)
+    output = viz_utils.create_barplot_v2(viz_df, subtask, output_dir)
 
