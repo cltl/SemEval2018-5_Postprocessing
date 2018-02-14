@@ -234,7 +234,7 @@ def create_barplot_v2(viz_df, subtask, out_dir, list_percs=None):
     # set xticklabels
     #g.set_xticklabels(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10>'])
     g.set_ylabels('Incident accuracy normalized')
-    g.set_xlabels('numerical answer class')
+    g.set_xlabels('numeric answer class')
 
     output_path = f'{out_dir}/s{subtask}.pdf'
     plt.savefig(output_path)
