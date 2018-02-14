@@ -281,7 +281,7 @@ def create_overview_paper_results(team2results, team2official_name):
     # to dfs
     subtask_and_metrics = [('Incident-level evaluation', ['s2_inc_accuracy', 's2_inc_rmse',
                                                           's3_inc_accuracy', 's3_inc_rmse']),
-                           ('Document-level evaluation', ['s2_doc_f1', 's3_doc_f1']),
+                           ('Document-level evaluation', ['s1_doc_f1', 's2_doc_f1', 's3_doc_f1']),
                            ]
 
     caption_template = '\\caption{results for evaluation metric: \\textbf{%s}.}'
